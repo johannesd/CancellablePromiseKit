@@ -1,0 +1,8 @@
+Pods/
+
+xcuserdata
+
+*.xccheckout
+*.moved-aside
+*.xcuserstate
+*.xcscmblueprint
