@@ -1,8 +1,8 @@
 Pod::Spec.new do |s|
   s.name             = 'CancellablePromiseKit'
-  s.version          = '0.1.0'
-  s.swift_version = '4.0'
-  s.summary          = 'Extends Promises to support cancellation.'
+  s.version          = '0.1.1'
+  s.swift_version    = '4.0'
+  s.summary          = 'Extends the amazing PromiseKit to cover cancellable tasks'
 
   s.description      = <<-DESC
                        CancellablePromiseKit is an extension for PromiseKit. A Promise is an abstraction of an asynchonous 

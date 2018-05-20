@@ -1,6 +1,6 @@
 # CancellablePromiseKit
 
-CancellablePromiseKit is an extension for [PromiseKit](https://github.com/mxcl/PromiseKit). A Promise is an abstraction of an asynchonous operation that can succeed or fail. A `CancellablePromise`, provided by this library, extends this concept to represent tasks that can be cancelled/aborted.
+CancellablePromiseKit is an extension for [PromiseKit](https://github.com/mxcl/PromiseKit). A `Promise` is an abstraction of an asynchonous operation that can succeed or fail. A `CancellablePromise`, provided by this library, extends this concept to represent tasks that can be cancelled/aborted.
 
 
 ## Installation
@@ -26,7 +26,7 @@ func startTask() -> CancellablePromise<String> {
             resolver.resolve(value, error)
         }
         let cancel = {
-            task.cancel()
+            task.stop()
             print("Task was cancelled")
         }
         return cancel
@@ -35,12 +35,12 @@ func startTask() -> CancellablePromise<String> {
 let runningTask = startTask()
 ```
 
-This initializer is similar to the one of `Promise`. However, the block has to return a function that cancels the task. In this example, it just calls the `cancel` function of the underlying task.
+This initializer is almost identical to the one of `Promise`. However, the block has to return a handler that will be executed when the `CancellablePromise` is cancelled. It has to perform the necessary steps to abort the underlying task.
 
 
 ## Cancelling
 
-A `CancellablePromise` has a `cancel()` function that will abort the underlying task:
+A `CancellablePromise` has a `cancel()` function for stopping the task:
 
 ```swift
 runningTask.cancel()
@@ -63,7 +63,7 @@ The `race` function of `PromiseKit` allows you to wait until the first task of a
 ```swift
 race([cancellablePromise1, cancellablePromise2, cancellablePromise3], autoCancel: true)
 ```
-If `cancellablePromise1` will fulfill, `cancellablePromise2` and `cancellablePromise3` will be cancelled automatically. 
+If `cancellablePromise1` will fulfill, `cancellablePromise2` and `cancellablePromise3` will be cancelled automatically. So, if these represent large downloads for example, no further bandwidth will be wasted.
 
 Similarly, there are `when(resolved:, autoCancel:)` and `when(fulfilled:, autoCancel:)` that cancel all other promises if one fails. 
 
@@ -92,7 +92,7 @@ If you want to use a `Promise` and a `CancellablePromise` in one expression (lik
 
 ## Other initializers of `CancellablePromise`
 
-`CancellablePromise` is not a subclass of `Promise`, but a wrapper around it. You can create a new instance by passing a promise and a cancel function:
+`CancellablePromise` is not a subclass of `Promise`, but a wrapper around it. You can create a new instance by passing a promise and a cancel block:
 
 ```swift
 let existingPromise, existingResolver = Promise<String>.pending()
@@ -102,34 +102,77 @@ let cancellablePromise = CancellablePromise<String>(using: existingPromise, canc
 ```
 
 
-In some cases, you're building your cancellable task using other promises. In that case, you can use the initializer that provides you with a `cancelPromise`that will reject on cancellation:
+In some cases, you're building your cancellable task using other promises. In that case, you can use the initializer that provides you with a `cancelPromise`. It is a `Promise<Void>` that nevers fulfills, but which will reject when `cancel()` is called. Putting it in a `race` with another promise allows you wait until that promise fulfills, unless the process is cancelled. The following example executes two tasks in parallel, followed by a third task. The whole process can be cancelled at any time:
 
 ```swift
-let cancellablePromise = CancellablePromise<String> { cancelPromise in
-    let task1 = Task(…)
-    let task2 = Task(…)
-    return when(fulfilled: [task1.asVoid(), task2.asVoid(), cancelPromise.asPromise().asVoid()]).then { _ in 
-        let values = [task1.value!, task2. value!]
-        let task3 = Task(values)
-        return when(fulfilled: [task3, cancelPromise.asPromise().asVoid()])
+let cancellablePromise = CancellablePromise<String>(wrapper: { cancelPromise in
+    let task1: Promise<String> = Task()
+    let task2: Promise<String> = Task()
+    let tasks = when(fulfilled: task1, task2)
+    return firstly {
+        race(tasks.asVoid(), cancelPromise)
+    }.then {
+        let value1 = task1.value!
+        let value2 = task2.value!
+        let task3: Promise<String> = AnotherTask(value1, value2)
+        return race(task3.asVoid(), cancelPromise).map {
+            task3.value!
+        }
     }
-}
+})
 ```
 
-Calling `cancellablePromise.cancel()` in this example will cause `cancelPromise` to reject, which will cause all `when(fulfilled:)` calls and hereby the whole `cancellablePromise` to reject.
+Calling `cancellablePromise.cancel()` in this example will cause `cancelPromise` to reject, which will cause all `race` calls and hereby the whole `cancellablePromise` to reject.
 
 
 ### `when` variants for `cancelPromise`
 
-As shown in the previous example, building a cancellable promise often involves waiting for another promise to finish, while also expecting a cancellation. Building this with `when` requires the promises to be converted to `Promise<Void>`, which makes getting the resolved value cumbersome. For that reason, there is the `when(:, while:)` overload. The example can be rewritten as:
+As shown in the previous example, building a cancellable promise often involves waiting for another promise to finish, while also expecting a cancellation. Building this with `race` requires the promises to be converted to `Promise<Void>`, which makes getting the resolved value cumbersome. For that reason, there is the `when(:, while:)` overload. 
+
+Instead of:
+```swift
+let task: Promise<String> = ...
+race(task.asVoid(), cancelPromise).then { 
+    let value = tasks.value!
+    // use value
+}
+```
+
+you can write:
+```swift
+when(task, while: cancelPromise).then { value in
+    // use value
+}
+```
+
+The example above can be rewritten as:
 
 ```swift
-let cancellablePromise = CancellablePromise<String> { cancelPromise in
-    let task1 = Task(…)
-    let task2 = Task(…)
-    return when(fulfilled: [task1, task2], while: cancelPromise).then { values in 
-        let task3 = Task(values)
+let cancellablePromise = CancellablePromise<String>(wrapper: { cancelPromise in
+    let task1: Promise<String> = Task()
+    let task2: Promise<String> = Task()
+    return firstly {
+        let tasks = when(fulfilled: task1, task2)
+        return when(tasks, while: cancelPromise)
+    }.then { (value1, value2) in
+        let task3: Promise<String> = AnotherTask(value1, value2)
         return when(task3, while: cancelPromise)
+    }
+})
+```
+
+In order to perform some actions when `cancelPromise` rejects, use `catch`:
+
+```swift
+let taskWithCancel = when(task, while: cancelPromise).then { value in
+    // ...
+}
+taskWithCancel.catch(policy: .allErrors) { error in
+    switch error {
+    case CancellablePromiseError.cancelled:
+        // do something to cancel the underlying task 
+    default:
+        // task failed
     }
 }
 ```
@@ -137,7 +180,7 @@ let cancellablePromise = CancellablePromise<String> { cancelPromise in
 
 ## TODO
 
-- There should be overloads for `map`, `done`, `get`, `catch` etc. that return a CancellablePromise. At the moment, the implementations of `Thenable` take effect and return a regular `Promise`.
+- There should be overloads for `map`, `done`, `get`, `catch` etc. that return a `CancellablePromise`. At the moment, the implementations of `Thenable` take effect and return a regular `Promise`.
 - There should be a `firstly` for `CancellablePromise`.
 - There should be an `asCancellable()` on `Guarantee` that returns a `CancellablePromise`. There won't be a ~~CancellableGuarantee~~ because a task that offers to be cancelled cannot also claim to always fulfill.
 - There should be an `asVoid()` on `CancellablePromise`.
