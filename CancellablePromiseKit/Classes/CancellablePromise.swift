@@ -52,10 +52,6 @@ public class CancellablePromise<T> {
         cancelFunction = cancel
     }
 
-    public convenience init(_ body: (_ cancelPromise: Promise<Void>) -> Promise<T>) {
-        self.init(body, cancel: { })
-    }
-    
     public convenience init(using promise: Promise<T>, cancel: @escaping () -> ()) {
         self.init({ _ in promise }, cancel: cancel)
     }
@@ -69,6 +65,10 @@ public class CancellablePromise<T> {
             resolver.reject(error)
             self.init(using: promise, cancel: { })
         }
+    }
+    
+    public convenience init(wrapper body: (_ cancelPromise: Promise<Void>) -> Promise<T>) {
+        self.init(body, cancel: { })
     }
     
     deinit {

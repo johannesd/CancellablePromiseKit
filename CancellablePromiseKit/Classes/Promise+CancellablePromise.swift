@@ -13,7 +13,7 @@ extension Promise {
      Returns a CancellablePromise.
      */
     public func asCancellable() -> CancellablePromise<T> {
-        return CancellablePromise({ cancelPromise in
+        return CancellablePromise(wrapper: { cancelPromise in
             return when(self, while: cancelPromise)
         })
     }
