@@ -73,7 +73,10 @@ public class CancellablePromise<T> {
     
     deinit {
         // Prevent PromiseKit's warning that a pending promise has been deinited:
-        cancelResolver.fulfill(Void())
+        let resolver = cancelResolver
+        (conf.Q.map ?? DispatchQueue.main).async {
+            resolver.fulfill(Void())
+        }
     }
     
 }

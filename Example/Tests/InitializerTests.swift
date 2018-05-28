@@ -49,5 +49,23 @@ class InitializerTests: XCTestCase {
         
         wait(for: [rejectionExpectation, fulfillmentExpectation], timeout: 0.1)
     }
+
+    func testDeinitPromise() {
+        let rejectionExpectation = expectation(description: "Cancel promise was rejected")
+        rejectionExpectation.isInverted = true
+        let fulfillmentExpectation = expectation(description: "CancelPromise was not fulfilled")
+        
+        testPromise = CancellablePromise { (cancelPromise) -> Promise<String> in
+            cancelPromise.done {
+                fulfillmentExpectation.fulfill()
+            }.catch(policy: .allErrors) { (error) in
+                rejectionExpectation.fulfill()
+            }
+            return Promise<String>.pending().promise
+        }
+        testPromise = nil
+        
+        wait(for: [rejectionExpectation, fulfillmentExpectation], timeout: 0.1)
+    }
     
 }
