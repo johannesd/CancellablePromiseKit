@@ -180,10 +180,9 @@ taskWithCancel.catch(policy: .allErrors) { error in
 
 ## TODO
 
-- There should be overloads for `map`, `done`, `get`, `catch` etc. that return a `CancellablePromise`. At the moment, the implementations of `Thenable` take effect and return a regular `Promise`.
+- There should be overloads for `done`, `get`, `catch` etc. that return a `CancellablePromise`. At the moment, the implementations of `Thenable` take effect and return a regular `Promise`.
 - There should be a `firstly` for `CancellablePromise`.
 - There should be an `asCancellable()` on `Guarantee` that returns a `CancellablePromise`. There won't be a ~~CancellableGuarantee~~ because a task that offers to be cancelled cannot also claim to always fulfill.
-- There should be an `asVoid()` on `CancellablePromise`.
 - `PromiseKit` has many overloads for `race` and `when` that can receive arrays, varadic parameters, etc. `CancellablePromiseKit` could have those, too.
 - There could be factory functions like `pending`, `value`, etc., like in `PromiseKit`
 

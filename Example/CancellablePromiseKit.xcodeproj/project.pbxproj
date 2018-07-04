@@ -15,6 +15,7 @@
 		8F0FDFBD20AF790800012FD0 /* InitializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0FDFB820AF790800012FD0 /* InitializerTests.swift */; };
 		8F0FDFBF20AF7D9F00012FD0 /* ThenableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0FDFBE20AF7D9F00012FD0 /* ThenableTests.swift */; };
 		8F0FDFC120AF7DE500012FD0 /* ThenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0FDFC020AF7DE500012FD0 /* ThenTests.swift */; };
+		8F8F7FEE20ED1DE700FDAFF2 /* MapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8F7FED20ED1DE700FDAFF2 /* MapTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,11 +29,12 @@
 		8F0FDFB820AF790800012FD0 /* InitializerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitializerTests.swift; sourceTree = "<group>"; };
 		8F0FDFBE20AF7D9F00012FD0 /* ThenableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThenableTests.swift; sourceTree = "<group>"; };
 		8F0FDFC020AF7DE500012FD0 /* ThenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThenTests.swift; sourceTree = "<group>"; };
+		8F8F7FED20ED1DE700FDAFF2 /* MapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapTests.swift; sourceTree = "<group>"; };
 		BEE08EDB204A47FA0CEB77F3 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		CAB1A0B1395BF75D0E71F6C7 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		D1F3D68B8145FA0E4261A7F4 /* Pods_CancellablePromiseKit_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CancellablePromiseKit_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6930DB2A43E4B199760CAE1 /* Pods-CancellablePromiseKit_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CancellablePromiseKit_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CancellablePromiseKit_Tests/Pods-CancellablePromiseKit_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		E8B015231F53EC898E94B7E6 /* CancellablePromiseKit.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CancellablePromiseKit.podspec; path = ../CancellablePromiseKit.podspec; sourceTree = "<group>"; };
+		E8B015231F53EC898E94B7E6 /* CancellablePromiseKit.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CancellablePromiseKit.podspec; path = ../CancellablePromiseKit.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +71,7 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				8F8F7FED20ED1DE700FDAFF2 /* MapTests.swift */,
 				8F0FDFB820AF790800012FD0 /* InitializerTests.swift */,
 				8F0FDFBE20AF7D9F00012FD0 /* ThenableTests.swift */,
 				8F0FDFB420AF790800012FD0 /* RaceTests.swift */,
@@ -248,6 +251,7 @@
 			files = (
 				8F0FDFB920AF790800012FD0 /* RaceTests.swift in Sources */,
 				8F0FDFBA20AF790800012FD0 /* WhenTests.swift in Sources */,
+				8F8F7FEE20ED1DE700FDAFF2 /* MapTests.swift in Sources */,
 				8F0FDFBF20AF7D9F00012FD0 /* ThenableTests.swift in Sources */,
 				8F0FDFBD20AF790800012FD0 /* InitializerTests.swift in Sources */,
 				8F0FDFBC20AF790800012FD0 /* WhenFulfilledTests.swift in Sources */,
