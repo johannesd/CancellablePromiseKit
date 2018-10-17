@@ -41,6 +41,29 @@ class WhenTests: XCTestCase {
         wait(for: [expectation], timeout: 0.1)
     }
 
+    func testRejected() {
+        let expectation = self.expectation(description: "Promise was not rejected")
+        
+        let (conditionPromise, _) = Promise<Void>.pending()
+        _ = when(testPromise.promise, while: conditionPromise).catch({ (error) in
+            expectation.fulfill()
+        })
+        testPromise.resolver.reject(Error())
+        
+        wait(for: [expectation], timeout: 0.1)
+    }
+
+    func testRejectedCondition() {
+        let expectation = self.expectation(description: "Promise was not rejected")
+        
+        let conditionPromise = Promise<Void>(error: Error())
+        _ = when(testPromise.promise, while: conditionPromise).catch({ (error) in
+            expectation.fulfill()
+        })
+        
+        wait(for: [expectation], timeout: 0.1)
+    }
+    
     func testFulfilledAndConditionFulfilled() {
         let expectation = self.expectation(description: "Promise was not fulfilled")
         
@@ -85,6 +108,24 @@ class WhenTests: XCTestCase {
             }
         }
         testPromise.resolver.fulfill(testValue)
+        conditionResolver.reject(Error())
+        
+        wait(for: [expectation], timeout: 0.1)
+    }
+    
+    func testConditionRejectedAfterFulfilledDismiss() {
+        let expectation = self.expectation(description: "Promise was not rejected")
+        
+        let (conditionPromise, conditionResolver) = Promise<Void>.pending()
+        _ = when(testPromise.promise, while: conditionPromise, isEnsured: true).catch(policy: .allErrors) { (error) in
+            switch error {
+            case CancellablePromiseError.cancelled:
+                expectation.fulfill()
+            default:
+                break
+            }
+        }
+        testPromise.resolver.fulfill("test")
         conditionResolver.reject(Error())
         
         wait(for: [expectation], timeout: 0.1)

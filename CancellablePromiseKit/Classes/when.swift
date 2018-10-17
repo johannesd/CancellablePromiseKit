@@ -11,16 +11,32 @@ import PromiseKit
 
 /**
  Wait for promise, but abort if conditionPromise fails
+ - Parameter promise: The promise to expect
+ - Parameter conditionPromise: If rejected, the waiting will abort
+ - Parameter ensured: If true, conditionPromise must not be rejected at the time the returned promise is evaluated
  */
-public func when<T>(_ promise: Promise<T>, while conditionPromise: Promise<Void>) -> Promise<T> {
+public func when<T>(_ promise: Promise<T>, while conditionPromise: Promise<Void>, isEnsured: Bool = false) -> Promise<T> {
     return when(fulfilled: [promise.asVoid(), race([promise.asVoid(), conditionPromise.asVoid()])]).map({ _ -> T in
-        promise.value!
+        if isEnsured && conditionPromise.isRejected {
+            throw CancellablePromiseError.cancelled
+        }
+        return promise.value!
     })
 }
 
-public func when<T>(_ cancellablePromise: CancellablePromise<T>, while conditionPromise: Promise<Void>, autoCancel: Bool = false) -> Promise<T> {
+/**
+ Wait for promise, but abort if conditionPromise fails
+ - Parameter promise: The promise to expect
+ - Parameter conditionPromise: If rejected, the waiting will abort
+ - Parameter ensured: If true, conditionPromise must not be rejected at the time the returned promise is evaluated
+ - Parameter autoCancel: Specifies if `cancellablePromise` should be cancelled when `conditionPromise` is rejected or when the returned promise is cancelled
+ */
+public func when<T>(_ cancellablePromise: CancellablePromise<T>, while conditionPromise: Promise<Void>, isEnsured: Bool = false, autoCancel: Bool = false) -> Promise<T> {
     return when(fulfilled: [cancellablePromise.asVoid(), race([cancellablePromise.asVoid(), conditionPromise.asVoid()])]).map({ _ -> T in
-        cancellablePromise.value!
+        if isEnsured && conditionPromise.isRejected {
+            throw CancellablePromiseError.cancelled
+        }
+        return cancellablePromise.value!
     }).ensure {
         if autoCancel {
             cancellablePromise.cancel()
