@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = 'CancellablePromiseKit'
   s.version          = '0.2.0'
-  s.swift_version    = '4.2'
+  s.swift_version    = '5.0'
   s.summary          = 'Extends the amazing PromiseKit to cover cancellable tasks'
 
   s.description      = <<-DESC
