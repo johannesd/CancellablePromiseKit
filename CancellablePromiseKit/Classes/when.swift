@@ -70,7 +70,7 @@ public func when<T>(fulfilled cancellablePromises: [CancellablePromise<T>]) -> C
 public func when<T>(resolved cancellablePromises: [CancellablePromise<T>], autoCancel: Bool) -> CancellablePromise<[Result<T>]> {
     return CancellablePromise { (cancelPromise) -> Promise<[Result<T>]> in
         let guarantee = when(resolved: cancellablePromises.map{ $0.asPromise() })
-        let promise = guarantee.mapValues({ v in return v })
+        let promise = Promise { guarantee.done($0.fulfill) }
         return when(promise, while: cancelPromise).ensure {
             if autoCancel {
                 cancelAll(in: cancellablePromises)
